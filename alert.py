@@ -4,9 +4,9 @@ import asyncio
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+import pygame
 
 load_dotenv()
-
 RTSP_URL = os.getenv("RTSP_URL")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
@@ -47,4 +47,24 @@ def detect_motion():
             )
         prev_frame = gray
 
+
+# Temporary Visualization
+pygame.init()
+
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("WatchDog Visualizer")
+
+clock = pygame.time.Clock()
+cap = cv2.VideoCapture(RTSP_URL)
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+    
+    screen.fill((0, 0, 0))
+    pygame.display.flip()
+    clock.tick(30)
+pygame.quit()
         
