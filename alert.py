@@ -14,8 +14,37 @@ CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
+# If there is motion
 async def send_alert(image_path):
     channel = client.get_channel(CHANNEL_ID)
-    await channel.send("Motion detected!", file=discord.File(image_path))
+    await channel.send("Something movedddd", file=discord.File(image_path))
     os.remove(image_path)
-    
+
+# Motion Dectection
+def detect_motion():
+    cap = cv2.VideoCapture(RTSP_URL)
+    prev_frame = None
+    while True:
+        returnn , frame = cap.read()
+        if not returnn:
+            print("Error! failed to read frame")
+            continue
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (21, 21), 0)
+        if prev_frame is None:
+            prev_frame = gray
+            continue
+        diff = cv2.absdiff(prev_frame, gray)
+        thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)[1]
+        motion_score = thresh.sum()
+        if motion_score > 500000:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            image_path = f"alert_{timestamp}.jpg"
+            cv2.imwrite(image_path, frame)
+            asyncio.run_coroutine_threadsafe(
+                send_alert(image_path),
+                client.loop
+            )
+        prev_frame = gray
+
+        
