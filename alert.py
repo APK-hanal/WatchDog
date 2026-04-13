@@ -29,7 +29,7 @@ last_alert = 0
 cooldown = 300
 def detect_motion():
     global last_alert
-    time.sleep(6)
+    time.sleep(5)
     cap = cv2.VideoCapture(RTSP_URL)
     if not cap.isOpened():
         print(f"Error while connecting to Camera")
@@ -37,7 +37,6 @@ def detect_motion():
     prev_frame = None
     while True:
         returnn , frame = cap.read()
-        time.sleep(2)
         if not returnn:
             print("Error! failed to read frame")
             continue
