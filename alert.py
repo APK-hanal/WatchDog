@@ -17,7 +17,6 @@ client = discord.Client(intents=intents)
 
 # If there is motion
 async def send_alert(image_path):
-    try:
         channel = client.get_channel(CHANNEL_ID)
         await channel.send("Something movedddd", file=discord.File(image_path))
         os.remove(image_path)
