@@ -18,7 +18,7 @@ client = discord.Client(intents=intents)
 async def send_alert(image_path):
     try:
         channel = client.get_channel(CHANNEL_ID)
-        await channel.send("Something movedddd", file=discord.File(image_path))
+        await channel.send("I detect Movement", file=discord.File(image_path))
         os.remove(image_path)
         print(f"Sucessfully sent! check Discord")
     except Exception as e:
@@ -27,6 +27,12 @@ async def send_alert(image_path):
 # Motion Dectection
 last_alert = 0
 cooldown = 300
+
+# Region of Interest (ROI)
+ROI_Y1 = 0    
+ROI_Y2 = 800  
+ROI_X1 = 400  
+ROI_X2 = 960 
 def detect_motion():
     global last_alert
     time.sleep(5)
@@ -40,7 +46,10 @@ def detect_motion():
         if not returnn:
             print("Error! failed to read frame")
             continue
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Crop to my hallway only
+        roi = frame[ROI_Y1:ROI_Y2, ROI_X1:ROI_X2]
+        # Use roi instead of frame for motion detection
+        gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
         if prev_frame is None:
             prev_frame = gray
@@ -51,7 +60,6 @@ def detect_motion():
         if motion_score > 100000:
             current_time = time.time()
             if current_time - last_alert > cooldown:
-                time.sleep(1)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 image_path = f"alert_{timestamp}.jpg"
                 cv2.imwrite(image_path, frame)
