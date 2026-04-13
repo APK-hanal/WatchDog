@@ -4,7 +4,6 @@ import asyncio
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-import pygame
 import time
 
 load_dotenv()
@@ -17,18 +16,28 @@ client = discord.Client(intents=intents)
 
 # If there is motion
 async def send_alert(image_path):
+    try:
         channel = client.get_channel(CHANNEL_ID)
         await channel.send("Something movedddd", file=discord.File(image_path))
         os.remove(image_path)
+        print(f"Sucessfully sent! check Discord")
+    except Exception as e:
+        print(f"Error occured!! {e}")
 
 # Motion Dectection
 last_alert = 0
 cooldown = 300
 def detect_motion():
+    global last_alert
+    time.sleep(6)
     cap = cv2.VideoCapture(RTSP_URL)
+    if not cap.isOpened():
+        print(f"Error while connecting to Camera")
+        return
     prev_frame = None
     while True:
         returnn , frame = cap.read()
+        time.sleep(2)
         if not returnn:
             print("Error! failed to read frame")
             continue
@@ -41,9 +50,9 @@ def detect_motion():
         thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)[1]
         motion_score = thresh.sum()
         if motion_score > 100000:
-            global last_alert
             current_time = time.time()
             if current_time - last_alert > cooldown:
+                time.sleep(1)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 image_path = f"alert_{timestamp}.jpg"
                 cv2.imwrite(image_path, frame)
@@ -60,6 +69,8 @@ async def on_ready():
     print(f"Bot is online as {client.user}")
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, detect_motion)
-
-client.run(BOT_TOKEN)
-        
+    
+try:
+    client.run(BOT_TOKEN)
+except Exception as e:
+    print(e)    
