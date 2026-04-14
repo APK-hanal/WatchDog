@@ -58,7 +58,7 @@ def detect_motion():
         thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)[1]
         motion_score = thresh.sum()
         if motion_score > 100000:
-            time.sleep(3)
+            time.sleep(5)
             current_time = time.time()
             if current_time - last_alert > cooldown:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
