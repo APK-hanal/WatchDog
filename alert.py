@@ -26,7 +26,7 @@ async def send_alert(image_path):
 
 # Motion Dectection
 last_alert = 0
-cooldown = 300
+cooldown = 0
 
 # Region of Interest (ROI)
 ROI_Y1 = 0    
@@ -58,6 +58,7 @@ def detect_motion():
         thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)[1]
         motion_score = thresh.sum()
         if motion_score > 100000:
+            print(motion_score)
             time.sleep(5)
             current_time = time.time()
             if current_time - last_alert > cooldown:
